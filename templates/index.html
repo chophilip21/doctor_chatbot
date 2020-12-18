@@ -1,0 +1,26 @@
+<!--Inherits form_macro and prelogin-layout -->
+
+{% from 'form_macro.html' import displayField %}
+
+{% extends "prelogin-layout.html" %}
+
+{% block title %}Registration{% endblock %} 
+
+{% block content %}
+    <h1>A great Doctor Chatapp will go here</h1>
+
+    <form action = "{{url_for('index')}}", method="POST">
+
+        {{displayField(form.username, 'Username', autocomplete='off', autofocus=true)}}
+        {{displayField(form.password, 'Pasword')}}
+        {{displayField(form.confirm_pswd, 'Retype password')}}
+
+        <div>
+            {{form.submit_button}}
+        </div>
+
+        {{form.csrf_token}} 
+
+    </form>
+
+{% endblock %}

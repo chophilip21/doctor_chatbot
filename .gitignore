@@ -130,4 +130,4 @@ dmypy.json
 /dataset
 .vscode
 
-*.txt
+/dataset
