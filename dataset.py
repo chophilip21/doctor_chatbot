@@ -2,7 +2,6 @@ import tqdm
 import warnings
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import torch
 from collections import defaultdict
 import os
@@ -81,12 +80,20 @@ def clean_up_txt(txt_path, cleaned_path):
         ignore_9 = 'Hello and welcome to ‘Ask A Doctor’ service. I have reviewed your query and here is my'
         ignore_10 = 'I have reviewed your query and here is my advice'
 
+        replace_1 = 'Purushottam welcomes you to HCM virtual clinic!Thanks for consulting at my virtual clinic.'
+        replace_2 = 'HCM'
+        replace_3 = 'HCMdear'
+
+        replace_count = 0
+
+
         # a sentence gets very useless when it starts with any of the following character
         ignore_list = [ignore_1, ignore_2, ignore_3, ignore_4, ignore_5, ignore_6, ignore_7, ignore_8, ignore_9, ignore_10]
 
         while line:
 
             line_count += 1
+
             line = line.strip()
 
             if any(map(line.startswith, ignore_list)):
@@ -97,6 +104,19 @@ def clean_up_txt(txt_path, cleaned_path):
                 print('removing shorter sentences')
             
             else:
+                
+                if replace_1 in line:
+                    line = line.replace(replace_1, "Welcome to Doctor Chatbot Service")
+                    replace_count += 1
+
+                if replace_2 in line:
+                    line = line.replace(replace_2, "Doctor Chatbot.")
+                    replace_count += 1
+
+                if replace_3 in line:
+                    line = line.replace(replace_3, "Doctor Chatbot.")
+                    replace_count += 1
+
                 writer.writelines(line + '\n')
 
             if line_count % 100:
@@ -104,21 +124,20 @@ def clean_up_txt(txt_path, cleaned_path):
 
             line = reader.readline()
 
-    print('process finished')
+    print('process finished. Replaced {}'.format(replace_count))
 
 
 if __name__ == "__main__":
 
+    noncovid_txt = 'dataset/non_covid.txt'
+    cleaned_path = 'dataset/non_covid_cleaned.txt'
 
-    covid_txt = 'dataset/covid.txt'
-    txt_path = 'dataset/non_covid_2.txt'
-    cleaned_path = 'dataset/non_covid_2_cleaned.txt'
+    # clean_up_txt(noncovid_txt, cleaned_path)
 
-    # clean_up_txt(txt_path, cleaned_path)
-
-    non_covid_csv = 'dataset/non_covid_2.csv'
+    non_covid_csv = 'dataset/non_covid.csv'
     txt_to_csv(cleaned_path, non_covid_csv)
 
+    covid_txt = 'dataset/covid.txt'
     original_csv = 'dataset/covid.csv'
     txt_to_csv(covid_txt, original_csv)
 

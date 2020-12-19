@@ -133,3 +133,4 @@ dmypy.json
 /dataset
 /outputs
 /runs
+/cache_dir
