@@ -81,7 +81,20 @@ def chat():
     if not current_user.is_authenticated:
         return "Please login first to access chat"
 
-    return "Chating room will be here"
+    return render_template('chat.html')
+
+@app.route("/get")
+def get_bot_response():    
+    userText = request.args.get('msg')
+
+    #TODO: You will instantiate the model here
+    # bot = Seq2SeqModel()
+    # response = bot.predict(userText)
+    # response = ' '.join(response)
+
+    return "Sorry Me completely untrained right now. Too dumb to answer your qestion"
+
+
 
 @app.route("/logout", methods=['GET'])
 def logout():
