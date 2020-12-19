@@ -32,15 +32,6 @@ if __name__ == "__main__":
     print('The length of test_df is: ', len(test_df))
 
 
-    # model_args = Seq2SeqArgs()
-    # model_args.num_train_epochs = 10
-    # model_args.evaluate_generated_text = True
-    # model_args.evaluate_during_training = True
-    # model_args.evaluate_during_training_verbose = True
-    # model_args.max_length = 30
-    # model_args.overwrite_output_dir = True
-
-
     model_args = {
     "reprocess_input_data": True,
     "overwrite_output_dir": True,
@@ -68,11 +59,6 @@ if __name__ == "__main__":
         "bert-base-cased",
     )
 
-      # model = Seq2SeqModel(
-    #     "roberta",
-    #     "roberta-base",
-    #     "bert-base-cased",
-    # )
 
     # model = Seq2SeqModel(
     #     encoder_decoder_type="bart",

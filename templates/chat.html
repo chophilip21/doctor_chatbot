@@ -5,27 +5,28 @@
     <center>
       <h1>
         <img
-          src="https://user-images.githubusercontent.com/20112458/49326597-773b7280-f57a-11e8-853d-20ed61d18b0d.png"
+          src="https://icon-library.com/images/hospital-cross-icon/hospital-cross-icon-18.jpg"
           alt="Doctor Chatbot"
-          style="width:40px;height:40px;"
-        />Your Personal ChatBot
+          style="width:2.5%;height:2.5%;margin-right: 1vw;"
+        />Welcome to Doctor Chatbot Service
       </h1>
     </center>
+    
 <div class="box"></div>
     <div class="boxed">
       <div>
         <div id="chatbox">
           <img
-            src="https://user-images.githubusercontent.com/20112458/49326597-773b7280-f57a-11e8-853d-20ed61d18b0d.png"
-            alt="CANDICE"
+            src="https://cdn.iconscout.com/icon/free/png-512/doctor-1659516-1410038.png"
+            alt="Birney"
             style="width:40px;height:40px;"
-          />
+          />Tip) Start by asking questions first. End by typing <b>bye</b>
           <p class="botText">
-            <span>Hi! I'm Birney, your Personal Doctorbot</span>
+            <span>Feel free to ask any health related quesitons!</span>
           </p>
         </div>
         <div id="userInput">
-          <input id="textInput" type="text" name="msg" placeholder="Message" />
+          <input id="textInput" type="text" name="msg" placeholder="Message" /> 
         </div>
       </div>
     </div>
@@ -61,6 +62,7 @@
         margin-right: auto;
         width: 40% !important;
         margin-top: 60px;
+        
       }
       #userInput {
         margin-left: auto;
@@ -83,19 +85,20 @@
         line-height: 30px;
       }
       .userText span {
-        background-color: #808080;
+        background-color: #aa4789;
         padding: 10px;
         border-radius: 2px;
       }
       .botText {
-        color: white;
+        color: rgb(255, 255, 255);
         font-family: monospace;
         font-size: 17px;
-        text-align: left;
+        text-align: initial;
         line-height: 30px;
+        display:inline-block;
       }
       .botText span {
-        background-color: #4169e1;
+        background-color: #8664e4;
         padding: 10px;
         border-radius: 2px;
       }
@@ -118,3 +121,26 @@
     </style>
 </head>
 
+<script>
+    function getBotResponse() {
+      var rawText = $("#textInput").val();
+      var userHtml = '<p class="userText"><span>' + rawText + "</span></p>";
+      $("#textInput").val("");
+      $("#chatbox").append(userHtml);
+      document
+        .getElementById("userInput")
+        .scrollIntoView({ block: "start", behavior: "smooth" });
+      $.get("/get", { msg: rawText }).done(function(data) {
+        var botHtml = '<p class="botText"><span>' + data + "</span></p>";
+        $("#chatbox").append(botHtml);
+        document
+          .getElementById("userInput")
+          .scrollIntoView({ block: "start", behavior: "smooth" });
+      });
+    }
+    $("#textInput").keypress(function(e) {
+      if (e.which == 13) {
+        getBotResponse();
+      }
+    });
+</script>

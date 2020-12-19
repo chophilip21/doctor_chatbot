@@ -9,6 +9,8 @@ import os.path
 import os
 import csv
 from itertools import zip_longest
+import nlpaug.augmenter.word as naw
+from nlpaug.util.file.download import DownloadUtil
 
 
 def txt_to_csv(txt_path, save_path):
@@ -127,25 +129,70 @@ def clean_up_txt(txt_path, cleaned_path):
     print('process finished. Replaced {}'.format(replace_count))
 
 
+def augment_dataset(csv, model_dir):
+
+    print('Augmenting the dataset...')
+    original = pd.read_csv(csv)
+
+    """
+    Conduct two process of augmentation
+    1. Synonym augmentation
+    2. Word Embedding augmemntation
+    """
+
+    syn_df = original.copy()
+    syn_aug = naw.SynonymAug(aug_src='wordnet')
+
+    # synonym augenter(simple version)
+    for i, query in enumerate(syn_df.src):
+        synonym = syn_aug.augment(query)
+        syn_df.at[i, 'src'] = synonym
+
+    #word embedding augmenter
+    word_df = original.copy()
+    embed_aug = naw.WordEmbsAug(
+        model_type='fasttext', model_path=model_dir+'/wiki-news-300d-1M.vec',
+        action="insert")
+
+    for i, query in enumerate(word_df.src):
+        insertion = embed_aug.augment(query)
+        word_df.at[i, 'src'] = insertion
+
+    a1 = original.append(syn_df, ignore_index=True)
+    a2 = a1.append(word_df, ignore_index=True)
+
+    a2.to_csv(os.path.join(model_dir, 'augmented.csv'), index=False)
+
+    return a2
+
+
 if __name__ == "__main__":
 
-    noncovid_txt = 'dataset/non_covid.txt'
-    cleaned_path = 'dataset/non_covid_cleaned.txt'
+    # noncovid_txt = 'dataset/non_covid.txt'
+    # cleaned_path = 'dataset/non_covid_cleaned.txt'
 
     # clean_up_txt(noncovid_txt, cleaned_path)
 
     non_covid_csv = 'dataset/non_covid.csv'
-    txt_to_csv(cleaned_path, non_covid_csv)
+    # # txt_to_csv(cleaned_path, non_covid_csv)
 
-    covid_txt = 'dataset/covid.txt'
+    # covid_txt = 'dataset/covid.txt'
     original_csv = 'dataset/covid.csv'
-    txt_to_csv(covid_txt, original_csv)
+    # # txt_to_csv(covid_txt, original_csv)
 
-    original = pd.read_csv(original_csv, names=['src', 'trg'])
+    # DownloadUtil.download_fasttext('wiki-news-300d-1M', 'dataset')
+    augmented_csv = 'dataset/augmented.csv'
+    # augment_dataset(original_csv, 'dataset')
+
+
+    covid = pd.read_csv(augmented_csv, names=['src', 'trg'])
+
+    print('The length of booosted dataset is: ', len(covid))
+
     non_covid = pd.read_csv(non_covid_csv, names=['src', 'trg'])
-    merge = original.append(non_covid)
+    merge = covid.append(non_covid)
 
-    merge.to_csv('dataset/combined.csv', index=False)
+    merge.to_csv('dataset/aug_reduced.csv', index=False)
 
 
 
