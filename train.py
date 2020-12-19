@@ -46,7 +46,7 @@ if __name__ == "__main__":
     "overwrite_output_dir": True,
     "max_seq_length": 50,
     "train_batch_size": 2,
-    "num_train_epochs": 10,
+    "num_train_epochs": 5,
     "save_eval_checkpoints": False,
     "save_model_every_epoch": False,
     "evaluate_generated_text": True,
@@ -57,7 +57,8 @@ if __name__ == "__main__":
     'eval_batch_size': 2,
     "save_steps": 8000,
     "evaluate_during_training_steps": 8000,
-    'use_multiprocessing': False
+    'use_multiprocessing': False,
+    'fp16': True,
 }
 
 
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     # )
 
     print('start training....')
-    model.train_model(train_df, eval_data=valid_df, args=model_args, use_cuda=True)
+    model.train_model(train_df, eval_data=valid_df, args=model_args)
 
     print('Done training. Testing a sample...')
     test = "an coronavirus symptoms be mild for some people versus severe ? for example, could it just involve being very fatigued, low grade fever for a few days and not the extreme symptoms? or is it always a full blown cold and struggle to breathe?"

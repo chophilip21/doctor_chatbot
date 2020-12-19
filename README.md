@@ -5,5 +5,4 @@
 
 
 ## Chatbot setup
-
-- The chatbot uses Python Flask as the general framework, PostgreSQL and SQLAlchemy as a database, and Heroku as the server.
+- The chatbot uses Python Flask as the general framework, PostgreSQL and SQLAlchemy as a database, and Heroku as the server. The password will be protected with Passlib hashing.

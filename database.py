@@ -1,15 +1,17 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
 #Initialize db for inheritance
 db = SQLAlchemy()
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     """
-    User model. To connect from terminal:
+    ? Here, we define what user is. 
+    UserMixin inheritance for managing login session
+    To connect from terminal:
     psql 'heroku credential url'
-    CREATE TABLE users(id, SERIAL.... VARCHAR )
     use \dt to check current tables
-    \d users to see specific entries the table
+    use table users; to see currently registered users.
     """ 
 
     __tablename__ = "users"
