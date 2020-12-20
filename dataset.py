@@ -2,7 +2,6 @@ import tqdm
 import warnings
 import numpy as np
 import pandas as pd
-import torch
 from collections import defaultdict
 import os
 import os.path

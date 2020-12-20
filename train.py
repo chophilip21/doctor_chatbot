@@ -8,13 +8,13 @@ from simpletransformers.seq2seq import (
 )
 from sklearn.model_selection import train_test_split
 import os.path
-import torch
+# import torch
 
 
 if __name__ == "__main__":
-    DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('good to go')
-    print(f'Device: {DEVICE}')
+    # print(f'Device: {DEVICE}')
 
     large_destination = 'dataset/aug_reduced.csv'
 

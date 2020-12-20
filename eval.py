@@ -5,7 +5,7 @@ from simpletransformers.seq2seq import (
     Seq2SeqModel,
     Seq2SeqArgs,
 )
-import torch
+# import torch
 from sklearn.model_selection import train_test_split
 import pandas as pd
 
@@ -52,10 +52,7 @@ def calculate_m_score(target, predictions, length):
 
 
 if __name__ == "__main__":
-    DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('good to go')
-    print(f'Device: {DEVICE}')
-
 
     # model = Seq2SeqModel("bart", "facebook/bart-base", "bart", config="outputs/best_model/config.json")   
     model = Seq2SeqModel(encoder_decoder_type='bart', encoder_decoder_name="facebook/bart-base", config="outputs/best_model/config.json")   
