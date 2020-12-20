@@ -24,9 +24,7 @@ TODO:
 @app.route("/get")
 def get_bot_response():    
     userText = request.args.get('msg')
-    login_form = LoginForm()
-    username = login_form.username.data
-
+  
     #TODO: You will instantiate the model here
     # bot = Seq2SeqModel()
     # response = bot.predict(userText)
@@ -49,12 +47,8 @@ def get_bot_response():
     response = "Sorry Me completely untrained right now. Too dumb to answer your qestion"
     
     if len(userText) <10 and any(map(userText.startswith, greetings)):
-
-        if username is None: 
-            response = "Hi there, how can I help you today?"
-        else: 
-            response = "Hi {}, how can I help you today?".format(username)
-
+        response = "Hi there, how can I help you today?"
+      
     if len(userText) <10 and any(map(userText.startswith, farewell)):
         response = "Take care and bye!"
     

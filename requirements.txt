@@ -25,7 +25,7 @@ Flask==1.1.2
 gitdb==4.0.5
 GitPython==3.1.11
 idna==2.10
-ipykernel==4.10.1 #5.4.2 
+ipykernel==5.1.2 #5.4.2 
 ipython==7.16.1 #7.19.0 originally
 ipython-genutils==0.2.0
 ipywidgets==7.5.1
@@ -113,3 +113,4 @@ webencodings==0.5.1
 Werkzeug==1.0.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
+emoji ==0.6.0
