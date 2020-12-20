@@ -1,0 +1,51 @@
+/* .userText{
+    padding: 1em;
+    text-align: right;
+    line-height: 1.5em;
+  }
+.userText span{
+    /* remove webkit p margins */
+    /* -webkit-margin-before: 0em;
+    -webkit-margin-after: 0em;
+} */ */
+
+#textInput {
+    border: none;
+    border-bottom: 3px solid rgb(255, 255, 255);
+}
+
+.userText {
+    color: white;
+    font-family: monospace;
+    font-size: 17px;
+    text-align: right;
+    line-height: 30px;
+}
+.userText span {
+    background-color: #7283e6;
+    padding: 10px;
+    border-radius: 10px;
+    display:inline-block;
+}
+.botText {
+    color: white;
+    font-family: monospace;
+    font-size: 17px;
+    text-align: left;
+    line-height: 30px;
+}
+.botText span {
+    background-color: #a59e9e;
+    padding: 10px;
+    border-radius: 10px;
+    display:inline-block;
+}
+
+.border-success{
+    background-color: white;
+    border-color: white !important;
+}
+
+.jumbotron{
+    background-color: rgb(247, 243, 57);
+}

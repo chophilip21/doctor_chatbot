@@ -5,9 +5,14 @@ from login_fields import *
 from database import *
 from passlib.hash import pbkdf2_sha256
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
+import os
+import emoji
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'replace_later'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Configure Recaptcha
 app.config['RECAPTCHA_USE_SSL']= False
@@ -74,14 +79,20 @@ def login():
 
     return render_template('login.html', form=login_form)
 
+def dir_last_updated(folder):
+    return str(max(os.path.getmtime(os.path.join(root_path, f))
+                   for root_path, dirs, files in os.walk(folder)
+                   for f in files))
+
+
 # @login_required #you should not see this without logging in
 @app.route("/chat", methods=['GET', 'POST'])
 def chat():
 
-    if not current_user.is_authenticated:
-        return "Please login first to access chat"
+    # if not current_user.is_authenticated:
+    #     return "Please login first to access chat"
 
-    return render_template('chat.html')
+    return render_template('chatroom.html')
 
 """
 TODO: 
@@ -127,6 +138,8 @@ def get_bot_response():
 
     if len(userText) <10 and any(map(userText.startswith, farewell)):
         response = "Take care and bye!"
+    
+    response = emoji.emojize(':pill: {}'.format(response))
 
     return response
 
