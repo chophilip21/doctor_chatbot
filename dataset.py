@@ -194,5 +194,8 @@ if __name__ == "__main__":
 
     merge.to_csv('dataset/aug_reduced.csv', index=False)
 
+    print('The length of booosted dataset is: ', len(merge))
+
+
 
 

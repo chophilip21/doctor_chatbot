@@ -11,32 +11,26 @@ import os.path
 import torch
 
 
-
-
 if __name__ == "__main__":
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('good to go')
     print(f'Device: {DEVICE}')
 
-    large_destination = 'dataset/combined.csv'
+    large_destination = 'dataset/aug_reduced.csv'
 
     # dataset = pd.read_csv(large_destination, names = ['input_text', 'target_text'], header=0)[0:50000]
     dataset = pd.read_csv(large_destination, names = ['input_text', 'target_text'], header=0)[1:]
 
-    train_df, test_df = train_test_split(dataset, test_size=0.1)
-    valid_df, test_df = train_test_split(test_df, test_size=0.5)
-
+    train_df, valid_df = train_test_split(dataset, test_size=0.05)
 
     print('The length of train_df is: ', len(train_df))
     print('The length of valid is: ', len(valid_df))
-    print('The length of test_df is: ', len(test_df))
-
 
     model_args = {
     "reprocess_input_data": True,
     "overwrite_output_dir": True,
-    "max_seq_length": 50,
-    "train_batch_size": 2,
+    "max_seq_length": 35,
+    "train_batch_size": 4,
     "num_train_epochs": 5,
     "save_eval_checkpoints": False,
     "save_model_every_epoch": False,
@@ -44,12 +38,14 @@ if __name__ == "__main__":
     "evaluate_during_training": True,
     "evaluate_during_training_verbose": True,
     "save_best_model": True,
-    "max_length": 50,
-    'eval_batch_size': 2,
+    "max_length": 35,
+    'gradient_accumulation_steps': 2,
+    'eval_batch_size': 4,
     "save_steps": 8000,
     "evaluate_during_training_steps": 8000,
     'use_multiprocessing': False,
     'fp16': True,
+    'no_save': False
 }
 
 
@@ -60,7 +56,7 @@ if __name__ == "__main__":
     )
 
 
-    # model = Seq2SeqModel(
+    # Bart = Seq2SeqModel(
     #     encoder_decoder_type="bart",
     #     encoder_decoder_name="facebook/bart-base",
     #     args=model_args,
