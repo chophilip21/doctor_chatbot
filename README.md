@@ -4,5 +4,6 @@
 - More data regarding non-covid inquiry was also added based on `MedDialog dataset`. Credits to https://github.com/UCSD-AI4H/Medical-Dialogue-System. 
 
 
-## Chatbot setup
-- The chatbot uses Python Flask as the general framework, PostgreSQL and SQLAlchemy as a database, and Heroku as the server. The password will be protected with Passlib hashing.
+## Instrunctions for running the app
+- If you just want to test the app, just run python train.py
+- This will start a local server where you can run 
