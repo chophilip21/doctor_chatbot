@@ -48,13 +48,11 @@ if __name__ == "__main__":
     'no_save': False
 }
 
-
     model = Seq2SeqModel(
-        "distilbert",
-        "distilbert-base-cased-distilled-squad",
-        "bert-base-cased",
-    )
-
+    "roberta",
+    "roberta-large",
+    "bert-large-cased",
+)
 
     # Bart = Seq2SeqModel(
     #     encoder_decoder_type="bart",
