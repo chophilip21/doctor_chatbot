@@ -36,8 +36,8 @@ def get_bot_response():
 
     response = "I am unable to answer your question at the moment. Please contact emergency if this is an urgent matter."
 
-    if len(userText) <= 1 or len(userText) >= 35:
-        response = 'Sorry about that. Your question is not valid in terms of length. Try rewording it so that I can understand'
+    if len(userText) <= 1:
+        response = 'Hmm your question is too short. Maybe you mistyped your question?'
 
     else:
 
@@ -67,13 +67,23 @@ def get_bot_response():
 
         else:
             #non macro
+            # model = Seq2SeqModel(
+            #     "distilbert",
+            #     encoder_decoder_name="outputs/distil_bert/",
+            #     args=MODEL_ARGS)
+
+
             model = Seq2SeqModel(
-                "distilbert",
-                encoder_decoder_name="best_model/",
-                args=MODEL_ARGS)
+            "roberta",
+            encoder_decoder_name = "outputs/roberta",
+            args=MODEL_ARGS,
+            )
+
 
             botresponse = model.predict([userText])
             response = ' '.join(botresponse)
+
+
 
     response = emoji.emojize(':pill: {}'.format(response))
 

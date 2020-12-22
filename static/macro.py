@@ -1,7 +1,7 @@
 #files for macro
 
 PROFANITY = ['fuck',  'asshole', "bitch", "bullshit",
-             "cunt", "motherfucker", "hell", "holy shit", 
+             "cunt", "motherfucker", "holy shit", 
              "nigga", "crap", "shit", "prick", "goddamn", "fucking", "slut"]
 
 
@@ -28,7 +28,7 @@ MODEL_ARGS = {
     "overwrite_output_dir": True,
     "max_seq_length": 35,
     "train_batch_size": 4,
-    "num_train_epochs": 5,
+    "num_train_epochs": 15,
     "save_eval_checkpoints": False,
     "save_model_every_epoch": False,
     "evaluate_generated_text": True,
