@@ -4,15 +4,18 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 import os
-import os.path
-import os
 import csv
 from itertools import zip_longest
 import nlpaug.augmenter.word as naw
+import nlpaug.augmenter.char as nac
 from nlpaug.util.file.download import DownloadUtil
 
 
-def txt_to_csv(txt_path, save_path):
+def txt_to_csv(txt_path, save_path, style='GPT2'):
+
+    """
+    Take raw txt file and organize it into basic csv format
+    """
 
     patient = []
     doctor = []
@@ -39,7 +42,7 @@ def txt_to_csv(txt_path, save_path):
     print('length of patient query', len(patient))
     print('length of doctor response', len(doctor))
     
-    if len(patient) == len(doctor):
+    if not style == 'GPT2' :
         data = {'src': patient, 'trg': doctor}
     
         data = pd.DataFrame.from_dict(data)
@@ -52,148 +55,136 @@ def txt_to_csv(txt_path, save_path):
 
         with open(save_path, mode='w', newline='') as csvfile:
             
-            fieldnames = ['src', 'trg']
+            fieldnames = ['Character', 'Line']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-
             for query, response in zipped:
-
-                writer.writerow({'src': query, 'trg': response})
-
-
-# Initial data cleaning
-def clean_up_txt(txt_path, cleaned_path):
-
-    line_count = 0
-
-    with open(txt_path, 'r') as reader, open(cleaned_path, 'w') as writer:
-
-        line = reader.readline()
-
-        ignore_1 = 'Dr.'
-        ignore_2 = 'Regards'
-        ignore_3 = "Dr "
-        ignore_4 = "Ask A Doctor"
-        ignore_5 = 'Dialogue'
-        ignore_6 = 'http'
-        ignore_7 = 'id='
-        ignore_8 = 'Hello and Welcome to'
-        ignore_9 = 'Hello and welcome to ‘Ask A Doctor’ service. I have reviewed your query and here is my'
-        ignore_10 = 'I have reviewed your query and here is my advice'
-
-        replace_1 = 'Purushottam welcomes you to HCM virtual clinic!Thanks for consulting at my virtual clinic.'
-        replace_2 = 'HCM'
-        replace_3 = 'HCMdear'
-
-        replace_count = 0
+                writer.writerow({'Character': 'Patient', 'Line': query})
+                writer.writerow({'Character': 'Doctor', 'Line': response})
 
 
-        # a sentence gets very useless when it starts with any of the following character
-        ignore_list = [ignore_1, ignore_2, ignore_3, ignore_4, ignore_5, ignore_6, ignore_7, ignore_8, ignore_9, ignore_10]
-
-        while line:
-
-            line_count += 1
-
-            line = line.strip()
-
-            if any(map(line.startswith, ignore_list)):
-                print('removing useless words')
-
-
-            elif len(line) <= 6:
-                print('removing shorter sentences')
-            
-            else:
-                
-                if replace_1 in line:
-                    line = line.replace(replace_1, "Welcome to Doctor Chatbot Service")
-                    replace_count += 1
-
-                if replace_2 in line:
-                    line = line.replace(replace_2, "Doctor Chatbot.")
-                    replace_count += 1
-
-                if replace_3 in line:
-                    line = line.replace(replace_3, "Doctor Chatbot.")
-                    replace_count += 1
-
-                writer.writelines(line + '\n')
-
-            if line_count % 100:
-                print('processing {}th line'.format(line_count))
-
-            line = reader.readline()
-
-    print('process finished. Replaced {}'.format(replace_count))
-
-
-def augment_dataset(csv, model_dir):
-
-    print('Augmenting the dataset...')
-    original = pd.read_csv(csv)
+def augment_dataset(input_csv, output_csv):
 
     """
-    Conduct two process of augmentation
-    1. Synonym augmentation
-    2. Word Embedding augmemntation
+    Augmenting the dataset based on NLP aug library. If the dataset is small, this is a great way to boost things up.
+    But you do not want to apply augmentation on the Doctor's response. These should not have any spelling mistakes. 
+    - The augmentation that will be done here is character level augmentations and word level augmentations:
+    - OCR error augmentation (character level)
+    - Keyboard augmentation (character level)
+    - Synonym augmenter (word level)
     """
 
-    syn_df = original.copy()
-    syn_aug = naw.SynonymAug(aug_src='wordnet')
+    print('Augmenting the dataset based on Synonyms...')
+    original = pd.read_csv(input_csv, names=['character', 'line'])
 
-    # synonym augenter(simple version)
-    for i, query in enumerate(syn_df.src):
-        synonym = syn_aug.augment(query)
-        syn_df.at[i, 'src'] = synonym
+    ocr = nac.OcrAug()
+    c_OCR = []
+    l_OCR = []
+    
+    keyboard = nac.KeyboardAug()
+    c_keyboard = []
+    l_keyboard = []
 
-    #word embedding augmenter
-    word_df = original.copy()
-    embed_aug = naw.WordEmbsAug(
-        model_type='fasttext', model_path=model_dir+'/wiki-news-300d-1M.vec',
-        action="insert")
+    synonym = naw.SynonymAug(aug_src='wordnet')
+    c_synonym = []
+    l_synonym = []
 
-    for i, query in enumerate(word_df.src):
-        insertion = embed_aug.augment(query)
-        word_df.at[i, 'src'] = insertion
+    for i in original.index:
 
-    a1 = original.append(syn_df, ignore_index=True)
-    a2 = a1.append(word_df, ignore_index=True)
+        if i % 10 == 0:
+            print('processing {}th line'.format(i))
 
-    a2.to_csv(os.path.join(model_dir, 'augmented.csv'), index=False)
+        character = original['character'][i]
+        line = original['line'][i]
 
-    return a2
+
+        if character == 'Patient':
+            #OCR augmentation
+            ocr_augmented_line = ocr.augment(line, n=3)
+            c_OCR.append(character)
+            l_OCR.append(ocr_augmented_line)
+
+            #keyboard augmentation
+            keyboard_augmented_line = keyboard.augment(line)
+            c_keyboard.append(character)
+            l_keyboard.append(keyboard_augmented_line)
+
+            #synonym augmentation
+            synonym_augmented_line = synonym.augment(line)
+            c_synonym.append(character)
+            l_synonym.append(synonym_augmented_line)
+
+        else:
+            c_OCR.append(character)
+            l_OCR.append(line)
+            c_keyboard.append(character)
+            l_keyboard.append(line)
+            c_synonym.append(character)
+            l_synonym.append(line)
+        
+    ocr_augmented_data = {'character': c_OCR, 'line': l_OCR}
+    ocr_df = pd.DataFrame.from_dict(ocr_augmented_data)
+
+    keyboard_augmented_data = {'character': c_keyboard, 'line': l_keyboard}
+    keyboard_df = pd.DataFrame.from_dict(keyboard_augmented_data)
+
+    synonym_augmented_data = {'character': c_synonym, 'line': l_synonym}
+    synonym_df = pd.DataFrame.from_dict(synonym_augmented_data)
+
+    augmented_1 = original.append(ocr_df, ignore_index=True)
+    augmented_2 = augmented_1.append(keyboard_df, ignore_index=True)
+    augmented_3 = augmented_2.append(synonym_df, ignore_index=True)
+    augmented_3.to_csv(output_csv, index=False)
+
+    print('original dataset length: {}'.format(len(original)))
+    print('Augmented dataset length: {}'.format(len(augmented_2)))
+
+
+def add_context_to_csv(input_csv, output_csv, n=6):
+
+    contexted = []
+
+    df = pd.read_csv(input_csv, names=['Character',"line"])
+
+    for i in range(n, len(df['line'])):
+
+        if df['Character'][i] == "Doctor":
+            row = []
+            prev = i - 1 - n # we additionally subtract 1, so row will contain current response and 7 previous responses  
+            for j in range(i, prev, -1):
+                row.append(df['line'][j])
+            contexted.append(row)
+        else:
+            continue 
+
+    columns = ['response', 'context'] 
+    columns = columns + ['context/'+str(i) for i in range(n-1)]
+    df1 = pd.DataFrame.from_records(contexted, columns=columns)
+    df1.to_csv(output_csv, index=False)
+
+    print('Modified csv to context based format')
+
 
 
 if __name__ == "__main__":
 
-    # noncovid_txt = 'dataset/non_covid.txt'
-    # cleaned_path = 'dataset/non_covid_cleaned.txt'
+    raw_txt = 'dataset/raw.txt'
+    raw_csv = "dataset/1.raw.csv"
 
-    # clean_up_txt(noncovid_txt, cleaned_path)
+    #first convert txt to csv file
+    txt_to_csv(raw_txt, raw_csv)
 
-    non_covid_csv = 'dataset/non_covid.csv'
-    # # txt_to_csv(cleaned_path, non_covid_csv)
+    #augment the dataset
+    aug_csv = 'dataset/2.aug.csv'
+    augment_dataset(raw_csv, aug_csv)
 
-    # covid_txt = 'dataset/covid.txt'
-    original_csv = 'dataset/covid.csv'
-    # # txt_to_csv(covid_txt, original_csv)
+    context_csv = 'dataset/3.data.csv'
 
-    # DownloadUtil.download_fasttext('wiki-news-300d-1M', 'dataset')
-    augmented_csv = 'dataset/augmented.csv'
-    # augment_dataset(original_csv, 'dataset')
+    add_context_to_csv(aug_csv, context_csv)
 
 
-    covid = pd.read_csv(augmented_csv, names=['src', 'trg'])
 
-    print('The length of booosted dataset is: ', len(covid))
 
-    non_covid = pd.read_csv(non_covid_csv, names=['src', 'trg'])
-    merge = covid.append(non_covid)
-
-    merge.to_csv('dataset/aug_reduced.csv', index=False)
-
-    print('The length of booosted dataset is: ', len(merge))
 
 
 

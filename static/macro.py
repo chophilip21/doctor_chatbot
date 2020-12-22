@@ -23,24 +23,3 @@ farewell_5 = "Bye"
 
 FAREWELL = [farewell_1, farewell_2, farewell_3, farewell_4, farewell_5]
 
-MODEL_ARGS = {
-    "reprocess_input_data": True,
-    "overwrite_output_dir": True,
-    "max_seq_length": 35,
-    "train_batch_size": 4,
-    "num_train_epochs": 15,
-    "save_eval_checkpoints": False,
-    "save_model_every_epoch": False,
-    "evaluate_generated_text": True,
-    "evaluate_during_training": True,
-    "evaluate_during_training_verbose": True,
-    "save_best_model": True,
-    "max_length": 35,
-    'gradient_accumulation_steps': 2,
-    'eval_batch_size': 4,
-    "save_steps": 8000,
-    "evaluate_during_training_steps": 8000,
-    'use_multiprocessing': False,
-    'fp16': True,
-    'no_save': False
-}
