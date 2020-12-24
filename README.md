@@ -4,7 +4,7 @@
 - The implementation here uses GPT-2 structure pretrained with DialoGPT weights provided from Microsoft.
 - If you would like access to the custom dataset I have used for training, please email pycho@sfu.ca.
 - This dataset is custom made and it's very small. GPT-2 model needs a lot of data to function properly and NLP-aug library was used to increase the size of the dataset. Refer to dataset.py for more information. 
-- The app uses Javascript for the front and simple Python Flask as backend. It was originally launched on Heroku sever, but later pulled down as Pytorch library alone is 1GB and it is larger than Heroku limit. I plan to look for other options like AWS EC2 in the future.  
+
 
 ## Instrunctions for running the app
 - Install Virtual environemnt, and simply pip install requirements.txt
@@ -12,5 +12,6 @@
 - If you want to train from scratch, run train.py.
 
 ## Demo
+Below is the live demo of the app.py. The app uses Javascript for the front and simple Python Flask as backend. It was originally launched on Heroku sever, but later pulled down as the files are too large to meet Heroku limit. I plan to explore other options like AWS EC2 in the future.  
 ![demo](demo.gif)
 
