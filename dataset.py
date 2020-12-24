@@ -9,61 +9,51 @@ from itertools import zip_longest
 import nlpaug.augmenter.word as naw
 import nlpaug.augmenter.char as nac
 from nlpaug.util.file.download import DownloadUtil
+import json
+import csv
 
 
-def txt_to_csv(txt_path, save_path, style='GPT2'):
+def make_dataset(path_to_train_data, path_to_validation_data):
+  f_train = open(path_to_train_data)
+  train_data = json.load(f_train)
+  f_train.close()
+  # print(len(train_data))
+  
+  f_validate = open(path_to_validation_data)
+  validate_data = json.load(f_validate)
+  f_validate.close()
+  # print(len(validate_data))
 
-    """
-    Take raw txt file and organize it into basic csv format
-    """
+  train_contexted = []
+  train_data = train_data
 
-    patient = []
-    doctor = []
+  for i in range(len(train_data)):
+    row = []
+    row.append(train_data[i][1])
+    row.append(train_data[i][0])
 
-    print('reading the file....')
+    train_contexted.append(row)  
 
-    with open(txt_path, 'r') as f:
-        lines = f.readlines()
+  validate_contexted = []
 
-        for i, line in enumerate(lines):
-            
-            if line.startswith('Patient:'):
+  for i in range(len(validate_data)):
+    row = []
+    row.append(validate_data[i][1])
+    row.append(validate_data[i][0])
+    validate_contexted.append(row)
 
-                if not lines[i+2].startswith('Doctor:'):
-                    patient.append(' '.join(lines[i+1:i+2]))
-                else:
-                    patient.append(lines[i+1])
+  columns = ['response', 'context'] 
 
-            elif line.startswith('Doctor:'):
-                
-                doctor.append(lines[i+1])
+  trn_df = pd.DataFrame.from_records(train_contexted, columns=columns)
+  
+  trn_df = augment_dataset(trn_df)
+  
+  val_df = pd.DataFrame.from_records(validate_contexted, columns=columns)
 
-
-    print('length of patient query', len(patient))
-    print('length of doctor response', len(doctor))
-    
-    if not style == 'GPT2' :
-        data = {'src': patient, 'trg': doctor}
-    
-        data = pd.DataFrame.from_dict(data)
-
-        data.to_csv(save_path, index=False)
-    
-    else: 
-
-        zipped = zip_longest(patient, doctor, fillvalue='Hello, how are you doing?')
-
-        with open(save_path, mode='w', newline='') as csvfile:
-            
-            fieldnames = ['Character', 'Line']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-            for query, response in zipped:
-                writer.writerow({'Character': 'Patient', 'Line': query})
-                writer.writerow({'Character': 'Doctor', 'Line': response})
+  return trn_df,val_df
 
 
-def augment_dataset(input_csv, output_csv):
+def augment_dataset(input_df):
 
     """
     Augmenting the dataset based on NLP aug library. If the dataset is small, this is a great way to boost things up.
@@ -75,112 +65,126 @@ def augment_dataset(input_csv, output_csv):
     """
 
     print('Augmenting the dataset based on Synonyms...')
-    original = pd.read_csv(input_csv, names=['character', 'line'])
 
     ocr = nac.OcrAug()
-    c_OCR = []
-    l_OCR = []
+    response_OCR = []
+    context_OCR = []
     
     keyboard = nac.KeyboardAug()
-    c_keyboard = []
-    l_keyboard = []
+    response_keyboard = []
+    context_keyboard = []
 
     synonym = naw.SynonymAug(aug_src='wordnet')
-    c_synonym = []
-    l_synonym = []
+    response_synonym = []
+    context_synonym = []
 
-    for i in original.index:
+
+    for i in input_df.index:
 
         if i % 10 == 0:
             print('processing {}th line'.format(i))
 
-        character = original['character'][i]
-        line = original['line'][i]
-
-
-        if character == 'Patient':
-            #OCR augmentation
-            ocr_augmented_line = ocr.augment(line, n=3)
-            c_OCR.append(character)
-            l_OCR.append(ocr_augmented_line)
-
-            #keyboard augmentation
-            keyboard_augmented_line = keyboard.augment(line)
-            c_keyboard.append(character)
-            l_keyboard.append(keyboard_augmented_line)
-
-            #synonym augmentation
-            synonym_augmented_line = synonym.augment(line)
-            c_synonym.append(character)
-            l_synonym.append(synonym_augmented_line)
-
-        else:
-            c_OCR.append(character)
-            l_OCR.append(line)
-            c_keyboard.append(character)
-            l_keyboard.append(line)
-            c_synonym.append(character)
-            l_synonym.append(line)
+        response = input_df['response'][i]
+        context = input_df['context'][i]
         
-    ocr_augmented_data = {'character': c_OCR, 'line': l_OCR}
+        #augmentation
+        ocr_augmented_line = ocr.augment(context, n=3)
+        response_OCR.append(response)
+        context_OCR.append(ocr_augmented_line)
+
+        #keyboard augmentation
+        keyboard_augmented_line = keyboard.augment(context)
+        response_keyboard.append(response)
+        context_keyboard.append(keyboard_augmented_line)
+
+        #synonym augmentation
+        synonym_augmented_line = synonym.augment(context)
+        response_synonym.append(response)
+        context_synonym.append(synonym_augmented_line)
+
+        
+    ocr_augmented_data = {'response': response_OCR, 'context': context_OCR}
     ocr_df = pd.DataFrame.from_dict(ocr_augmented_data)
 
-    keyboard_augmented_data = {'character': c_keyboard, 'line': l_keyboard}
+    keyboard_augmented_data = {'response': response_keyboard, 'context': context_keyboard}
     keyboard_df = pd.DataFrame.from_dict(keyboard_augmented_data)
 
-    synonym_augmented_data = {'character': c_synonym, 'line': l_synonym}
+    synonym_augmented_data = {'response': response_synonym, 'context': context_synonym}
     synonym_df = pd.DataFrame.from_dict(synonym_augmented_data)
 
-    augmented_1 = original.append(ocr_df, ignore_index=True)
+    augmented_1 = input_df.append(ocr_df, ignore_index=True)
     augmented_2 = augmented_1.append(keyboard_df, ignore_index=True)
     augmented_3 = augmented_2.append(synonym_df, ignore_index=True)
-    augmented_3.to_csv(output_csv, index=False)
 
-    print('original dataset length: {}'.format(len(original)))
+    print('original dataset length: {}'.format(len(input_df)))
     print('Augmented dataset length: {}'.format(len(augmented_2)))
 
+    return augmented_3
 
-def add_context_to_csv(input_csv, output_csv, n=6):
 
+def reformat_df(input_df, save_dir, n=6, train=True):
+
+    print('reformatting the df to make space for context....')
+
+    if train:
+      save_path = os.path.join(save_dir, 'train.csv')
+    else:
+      save_path = os.path.join(save_dir, 'valid.csv')
+
+    with open(save_path, mode='w+', newline='') as csvfile:
+      fieldnames = ['Character', 'line']
+      writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+      #THE FORMAT NEEDS TO BE DIFFERENT. 
+      for i in input_df.index:
+        response = input_df['response'][i]
+        query = input_df['context'][i]
+        writer.writerow({'Character': 'Patient', 'line': query})
+        writer.writerow({'Character': 'Doctor', 'line': response})
+
+    csvfile.close()
+
+    reformatted_df = pd.read_csv(save_path, names=fieldnames)
     contexted = []
 
-    df = pd.read_csv(input_csv, names=['Character',"line"])
+    print('Inserting context... ')
 
-    for i in range(n, len(df['line'])):
-
-        if df['Character'][i] == "Doctor":
-            row = []
-            prev = i - 1 - n # we additionally subtract 1, so row will contain current response and 7 previous responses  
-            for j in range(i, prev, -1):
-                row.append(df['line'][j])
-            contexted.append(row)
-        else:
-            continue 
+    for i in range(n, len(reformatted_df['line'])):
+      row = []
+      prev = i - 1 - n # we additionally subtract 1, so row will contain current response and 7 previous responses  
+      for j in range(i, prev, -1):
+        row.append(reformatted_df['line'][j])
+      contexted.append(row)
 
     columns = ['response', 'context'] 
     columns = columns + ['context/'+str(i) for i in range(n-1)]
-    df1 = pd.DataFrame.from_records(contexted, columns=columns)
-    df1.to_csv(output_csv, index=False)
 
-    print('Modified csv to context based format')
+    df = pd.DataFrame.from_records(contexted, columns=columns)
 
+    if train:
+      final_path = os.path.join(save_dir, 'contexted_train.csv')
+    else:
+      final_path = os.path.join(save_dir, 'contexted_valid.csv')
+
+    df.to_csv(final_path, index=False)
+
+    # return df
 
 
 if __name__ == "__main__":
 
-    raw_txt = 'dataset/raw.txt'
-    raw_csv = "dataset/1.raw.csv"
+    train_json = 'dataset/train_duplicates.json'
+    validate_json = "dataset/validate_data.json"
+    
+    train, valid = make_dataset(train_json, validate_json)
 
-    #first convert txt to csv file
-    txt_to_csv(raw_txt, raw_csv)
+    reformat_df(train, 'dataset', train=True)
+    reformat_df(valid, 'dataset', train=False)
 
-    #augment the dataset
-    aug_csv = 'dataset/2.aug.csv'
-    augment_dataset(raw_csv, aug_csv)
 
-    context_csv = 'dataset/3.data.csv'
 
-    add_context_to_csv(aug_csv, context_csv)
+    # train.to_csv('dataset/train.csv', index=False)
+    # valid.to_csv('dataset/valid.csv', index=False)
 
 
 

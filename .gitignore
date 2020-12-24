@@ -131,7 +131,9 @@ dmypy.json
 .vscode
 
 /dataset
-/outputs
+/best_nlp_model
+/output-small
 /runs
 /cache_dir
 /cached
+/apex

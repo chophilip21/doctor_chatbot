@@ -4,12 +4,20 @@ import json
 import os
 import emoji
 import re
-from static.macro import PROFANITY, GREETINGS, FAREWELL, MODEL_ARGS
-import pandas as pd
+from static.macro import PROFANITY, GREETINGS, FAREWELL
 import COVID19Py
 import random
-from simpletransformers.seq2seq import Seq2SeqModel
-
+from transformers import (
+    MODEL_WITH_LM_HEAD_MAPPING,
+    WEIGHTS_NAME,
+    AdamW,
+    AutoConfig,
+    AutoModelWithLMHead,
+    AutoTokenizer,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    get_linear_schedule_with_warmup,
+)
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -66,23 +74,23 @@ def get_bot_response():
             response = random.choice(response)
 
         else:
-            #non macro
-            # model = Seq2SeqModel(
-            #     "distilbert",
-            #     encoder_decoder_name="outputs/distil_bert/",
-            #     args=MODEL_ARGS)
 
+            tokenizer = AutoTokenizer.from_pretrained('microsoft/DialoGPT-small')
+            model = AutoModelWithLMHead.from_pretrained('output-small')
 
-            model = Seq2SeqModel(
-            "roberta",
-            encoder_decoder_name = "outputs/roberta",
-            args=MODEL_ARGS,
+            new_user_input_ids = tokenizer.encode(userText + tokenizer.eos_token, return_tensors='pt')
+
+            chat_history_ids = model.generate(
+            new_user_input_ids, max_length=200,
+            pad_token_id=tokenizer.eos_token_id,  
+            no_repeat_ngram_size=3,       
+            do_sample=True, 
+            top_k=100, 
+            top_p=0.7,
+            temperature = 0.8
             )
 
-
-            botresponse = model.predict([userText])
-            response = ' '.join(botresponse)
-
+            response = tokenizer.decode(chat_history_ids[:, new_user_input_ids.shape[-1]:][0], skip_special_tokens=True)
 
 
     response = emoji.emojize(':pill: {}'.format(response))
@@ -91,6 +99,8 @@ def get_bot_response():
 
 
 if __name__ == "__main__":
-    # app.run(host="localhost", port=5000, debug=True) #only for testing
-
-    app.run(threaded=True, port=5000)
+    #* For simple testing, use below:
+    app.run(host="localhost", port=5000, debug=True) #only for testing
+    
+    #TODO: For real server deployment, use below
+    # app.run(threaded=True, port=5000)
