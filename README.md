@@ -1,6 +1,6 @@
 # covid_dialgue
 
-- This repository is created based on my SFU CMPT 825 Final Project, and the following is our report: https://drive.google.com/file/d/16trZ2V6sWcwlxhVWZyeJ1Y-YaIVAs2ds/view?usp=sharing  
+- This repository is created based on my SFU CMPT 825 Final Project, and the following is our report: https://drive.google.com/file/d/1D2BLTjKHPg_1zGe4kGyO7YPR8brx34Ed/view?usp=sharing
 - The implementation here uses GPT-2 structure pretrained with DialoGPT weights provided from Microsoft.
 - If you would like access to the custom dataset I have used for training, please email pycho@sfu.ca.
 - This dataset is custom made and it's very small. GPT-2 model needs a lot of data to function properly and NLP-aug library was used to increase the size of the dataset. Refer to dataset.py for more information. 
