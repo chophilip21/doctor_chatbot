@@ -12,6 +12,7 @@
 - If you want to train from scratch, run train.py.
 
 ## Demo
-Below is the live demo of the app.py. The app uses Javascript for the front and simple Python Flask as backend. It was originally launched on Heroku sever, but later pulled down as the files are too large to meet Heroku limit. I plan to explore other options like AWS EC2 in the future.  
+Below is the live demo of the app.py. The app uses Javascript for the front and simple Python Flask as backend. It was originally launched on Heroku sever, but later pulled down as the files are too large to meet Heroku limit. I plan to explore other options like AWS EC2 in the future. At the moment, it only runs on localhost server.
+
 ![demo](demo.gif)
 
